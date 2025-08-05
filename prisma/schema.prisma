@@ -1,0 +1,160 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  apiKeys       ApiKey[]
+  projects      Project[]
+  settings      UserSettings?
+  savedProjects SavedProject[]
+}
+
+model ApiKey {
+  id          String   @id @default(cuid())
+  provider    String   // 'claude', 'openai', 'google', 'zai'
+  apiKey      String   // Encrypted API key
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, provider])
+}
+
+model UserSettings {
+  id            String   @id @default(cuid())
+  theme         String   @default("system") // 'light', 'dark', 'system'
+  editorTheme   String   @default("vs-light") // Monaco editor theme
+  fontSize      Int      @default(14)
+  fontFamily    String   @default("Consolas, 'Courier New', monospace")
+  wordWrap      Boolean  @default(true)
+  minimap       Boolean  @default(false)
+  lineNumbers   String   @default("on") // 'on', 'off', 'relative', 'interval'
+  autoSave      Boolean  @default(true)
+  notifications Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  title     String
+  content   String?
+  published Boolean  @default(false)
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Project {
+  id                  String   @id @default(cuid())
+  name                String
+  description         String?
+  created_date        DateTime @default(now())
+  last_modified       DateTime @updatedAt
+  technology_stack    String   // JSON field storing selected languages/frameworks
+  project_type        String   // web app, API, desktop app, mobile, CLI tool
+  scale               String   // small, medium, enterprise
+  architecture_pattern String  // MVC, microservices, monolithic, serverless
+  deployment_environment String // cloud, on-premise, hybrid
+  requirements        String   // JSON field for structured requirements
+  userId              String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  // Relations
+  generatedPrompts    GeneratedPrompt[]
+  savedProjects       SavedProject[]
+  user                User?     @relation(fields: [userId], references: [id])
+}
+
+model Template {
+  id                   String   @id @default(cuid())
+  language             String
+  framework            String?
+  category             String   // Frontend, Backend, Systems, Mobile
+  base_prompt_structure String
+  common_patterns      String   // JSON field
+  best_practices       String
+  coding_standards     String
+  version_compatibility String  // JSON field
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+    
+  generatedPrompts     GeneratedPrompt[]
+}
+
+model GeneratedPrompt {
+  id                   String   @id @default(cuid())
+  project_id           String
+  language             String
+  framework            String?
+  generated_prompt_text String
+  context_data         String   // JSON field
+  accuracy_score       Float?
+  user_feedback        String?
+  template_id          String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+    
+  project              Project @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  template             Template? @relation(fields: [template_id], references: [id])
+}
+
+model CodePattern {
+  id                   String   @id @default(cuid())
+  language             String
+  pattern_type         String   // e.g., "architecture", "error_handling", "testing"
+  code_structure       String
+  implementation_notes String
+  use_cases            String   // JSON field
+  examples             String   // JSON field
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model SavedProject {
+  id                  String   @id @default(cuid())
+  name                String
+  description         String?
+  projectContext      String   // JSON field
+  selectedTech        String   // JSON field
+  requirements        String   // JSON field
+  generatedCode       String   // JSON field
+  versionHistory      String   // JSON field
+  isPublic            Boolean  @default(false)
+  tags                String   // JSON field for tags
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  // Relations
+  userId              String
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId           String?
+  project             Project?  @relation(fields: [projectId], references: [id])
+}

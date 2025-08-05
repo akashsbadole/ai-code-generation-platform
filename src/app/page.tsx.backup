@@ -1,0 +1,872 @@
+"use client"
+
+import { useState } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Checkbox } from "@/components/ui/checkbox"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Download, Copy, CheckCircle, AlertTriangle, Info, Sparkles, Code, Wand2 } from "lucide-react"
+
+const technologies = {
+  Frontend: [
+    { name: "React", versions: ["18", "17", "16"] },
+    { name: "Vue.js", versions: ["3", "2"] },
+    { name: "Angular", versions: ["17", "16", "15"] },
+    { name: "Svelte", versions: ["4", "3"] },
+    { name: "Next.js", versions: ["14", "13"] },
+    { name: "Nuxt.js", versions: ["3", "2"] }
+  ],
+  Backend: [
+    { name: "Node.js", versions: ["20", "18", "16"] },
+    { name: "Python", versions: ["3.12", "3.11", "3.10"] },
+    { name: "Java", versions: ["21", "17", "11"] },
+    { name: "C#", versions: ["12", "11", "10"] },
+    { name: "Go", versions: ["1.22", "1.21", "1.20"] },
+    { name: "Rust", versions: ["1.77", "1.76", "1.75"] },
+    { name: "PHP", versions: ["8.3", "8.2", "8.1"] }
+  ],
+  Database: [
+    { name: "PostgreSQL", versions: ["16", "15", "14"] },
+    { name: "MySQL", versions: ["8.3", "8.2", "8.1"] },
+    { name: "MongoDB", versions: ["7.0", "6.0", "5.0"] },
+    { name: "SQLite", versions: ["3.45", "3.44", "3.43"] },
+    { name: "Redis", versions: ["7.2", "7.0", "6.2"] }
+  ],
+  Mobile: [
+    { name: "React Native", versions: ["0.73", "0.72", "0.71"] },
+    { name: "Flutter", versions: ["3.19", "3.16", "3.13"] },
+    { name: "Swift", versions: ["5.10", "5.9", "5.8"] },
+    { name: "Kotlin", versions: ["1.9", "1.8", "1.7"] }
+  ]
+}
+
+export default function CodeGenerationInterface() {
+  const [selectedTech, setSelectedTech] = useState<{[key: string]: { name: string, version: string }}>({})
+  const [projectContext, setProjectContext] = useState({
+    name: "",
+    description: "",
+    type: "",
+    scale: "",
+    architecture: "",
+    deployment: ""
+  })
+  const [requirements, setRequirements] = useState({
+    functional: "",
+    nonFunctional: "",
+    businessLogic: "",
+    integrations: ""
+  })
+  const [generatedPrompt, setGeneratedPrompt] = useState("")
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [validationResult, setValidationResult] = useState<any>(null)
+  const [isValidating, setIsValidating] = useState(false)
+  const [showAdvanced, setShowAdvanced] = useState(false)
+
+  const handleTechSelect = (category: string, tech: string, version: string) => {
+    setSelectedTech(prev => ({
+      ...prev,
+      [category]: { name: tech, version }
+    }))
+  }
+
+  const generatePrompt = async () => {
+    setIsGenerating(true)
+    
+    // Local prompt generation without API calls
+    setTimeout(() => {
+      const prompt = `# Code Generation Prompt: ${projectContext.name || "My Project"}
+
+## Project Overview
+**Project Name:** ${projectContext.name || "Untitled Project"}
+**Description:** ${projectContext.description || "No description provided"}
+**Type:** ${projectContext.type || "Web Application"}
+**Scale:** ${projectContext.scale || "Medium"}
+**Architecture:** ${projectContext.architecture || "MVC"}
+**Deployment:** ${projectContext.deployment || "Cloud"}
+
+## Technology Stack
+${Object.entries(selectedTech).map(([category, tech]) => 
+  `- **${category}:** ${tech.name} v${tech.version}`
+).join('\n') || "- No technologies selected"}
+
+## Requirements
+
+### Functional Requirements
+${requirements.functional || "No functional requirements specified"}
+
+### Non-Functional Requirements  
+${requirements.nonFunctional || "No non-functional requirements specified"}
+
+### Business Logic
+${requirements.businessLogic || "No business logic specified"}
+
+### Integration Requirements
+${requirements.integrations || "No integration requirements specified"}
+
+## Architecture Guidelines
+${projectContext.architecture === 'microservices' ? 
+`**Microservices Architecture Guidelines:**
+- Design services around business capabilities
+- Each service should be independently deployable
+- Implement proper service discovery and registry
+- Use API Gateway for external communication
+- Implement inter-service communication (REST, gRPC, messaging)
+- Design for failure and implement circuit breakers
+- Use containerization (Docker) for deployment` :
+projectContext.architecture === 'mvc' ?
+`**MVC Architecture Guidelines:**
+- Separate concerns into Model, View, and Controller layers
+- Models handle data logic and database interactions
+- Views handle presentation and user interface
+- Controllers handle business logic and coordinate between models and views
+- Implement proper routing and URL structure
+- Use dependency injection for loose coupling` :
+`**General Architecture Guidelines:**
+- Follow clean architecture principles
+- Separate concerns into distinct layers
+- Implement proper dependency injection
+- Design for scalability and maintainability
+- Use appropriate design patterns for the use case
+- Implement proper error handling and logging`
+}
+
+## Technology-Specific Implementation Guidelines
+${Object.entries(selectedTech).map(([category, tech]) => {
+  let guidelines = ""
+  switch(tech.name) {
+    case "React":
+      guidelines = `
+**React Guidelines:**
+- Use functional components with hooks
+- Implement proper state management (useState, useReducer, Context API, Redux/Zustand)
+- Follow component composition patterns
+- Use TypeScript for type safety
+- Implement proper error boundaries
+- Use React.memo for performance optimization
+- Follow naming conventions: PascalCase for components, camelCase for functions
+- Implement proper accessibility (a11y) practices
+- Use semantic HTML elements`
+      break
+    case "Node.js":
+      guidelines = `
+**Node.js Guidelines:**
+- Use Express.js or Fastify for web framework
+- Implement proper middleware for authentication and validation
+- Use async/await for asynchronous operations
+- Implement proper error handling and logging
+- Follow RESTful API design principles
+- Use dependency injection for better testability
+- Implement proper HTTP status codes
+- Use environment variables for configuration
+- Follow security best practices
+- Implement proper logging and monitoring`
+      break
+    case "Python":
+      guidelines = `
+**Python Guidelines:**
+- Use FastAPI or Flask for web framework
+- Follow PEP 8 coding standards
+- Use type hints for better code clarity
+- Implement proper exception handling
+- Use virtual environments for dependency management
+- Follow async/await patterns for I/O operations
+- Use Pydantic for data validation
+- Implement proper dependency injection
+- Use environment variables for configuration
+- Follow security best practices`
+      break
+    case "PostgreSQL":
+      guidelines = `
+**PostgreSQL Guidelines:**
+- Follow proper database normalization principles
+- Use appropriate data types for columns
+- Implement proper indexing strategies
+- Use foreign key constraints for data integrity
+- Implement proper transaction management
+- Use connection pooling for performance
+- Follow naming conventions (snake_case)
+- Implement proper backup and recovery strategies
+- Use parameterized queries to prevent SQL injection
+- Monitor database performance regularly`
+      break
+    case "MongoDB":
+      guidelines = `
+**MongoDB Guidelines:**
+- Design appropriate document schema for use case
+- Use embedding for related data that's accessed together
+- Use referencing for many-to-many relationships
+- Implement proper indexing strategies
+- Use appropriate data types and structures
+- Follow MongoDB naming conventions (camelCase)
+- Implement proper validation rules
+- Use aggregation pipelines for complex queries
+- Implement proper security measures
+- Monitor database performance regularly`
+      break
+    default:
+      guidelines = `
+**${tech.name} Guidelines:**
+- Follow ${tech.name} v${tech.version} best practices and conventions
+- Use version ${tech.version} specific features and APIs
+- Implement proper error handling and logging
+- Follow security best practices for ${tech.name}
+- Ensure code is well-documented and maintainable
+- Use appropriate design patterns for the technology
+- Implement proper testing strategies
+- Follow performance optimization techniques`
+  }
+  return guidelines
+}).join('\n')}
+
+## Code Quality Standards
+
+### General Guidelines
+- Write clean, readable, and maintainable code
+- Follow established coding standards for each technology
+- Use meaningful variable and function names
+- Implement proper error handling and logging
+- Add comprehensive comments and documentation
+- Follow DRY (Don't Repeat Yourself) principle
+- Implement proper separation of concerns
+
+### Project Structure Recommendations
+Create a logical folder structure that supports the ${projectContext.architecture || 'selected'} pattern:
+
+\`\`\`
+${(projectContext.name || 'project').toLowerCase()}/
+├── src/
+│   ├── components/          # UI components (for frontend)
+│   ├── pages/              # Page components (for frontend)
+│   ├── services/           # Business logic services
+│   ├── controllers/        # API controllers (for backend)
+│   ├── models/             # Data models and schemas
+│   ├── utils/              # Utility functions
+│   ├── types/              # Type definitions
+│   ├── config/             # Configuration files
+│   ├── middleware/         # Middleware functions
+│   └── tests/              # Test files
+├── public/                 # Static assets
+├── docs/                   # Documentation
+├── scripts/                # Build and deployment scripts
+└── config/                 # Configuration files
+\`\`\`
+
+### Development Workflow
+1. **Setup Phase:**
+   - Initialize project with appropriate tools
+   - Set up version control (Git)
+   - Configure development environment
+   - Install necessary dependencies
+
+2. **Development Phase:**
+   - Implement core functionality following the architecture
+   - Write comprehensive tests
+   - Implement proper error handling
+   - Add logging and monitoring
+
+3. **Testing Phase:**
+   - Unit testing for individual components
+   - Integration testing for component interactions
+   - End-to-end testing for user workflows
+   - Performance testing for scalability
+
+4. **Deployment Phase:**
+   - Set up CI/CD pipeline
+   - Configure deployment environment
+   - Implement monitoring and alerting
+   - Set up backup and recovery procedures
+
+## Security Best Practices
+- Implement proper input validation and sanitization
+- Use parameterized queries to prevent SQL injection
+- Implement proper authentication and authorization
+- Use HTTPS and security headers
+- Validate and sanitize all user inputs
+- Implement proper error handling (avoid information leakage)
+- Use secure coding practices for each technology
+- Implement proper session management
+- Use encryption for sensitive data
+
+## Performance Optimization
+- Implement appropriate caching strategies
+- Optimize database queries and use proper indexing
+- Use lazy loading and code splitting
+- Implement proper connection pooling
+- Use compression for assets and API responses
+- Implement proper monitoring and performance analysis
+- Use CDN for static assets
+- Optimize images and other media files
+
+## Testing Strategy
+### Unit Testing
+- Test individual components and functions
+- Use appropriate testing frameworks for each technology
+- Mock external dependencies
+- Achieve high code coverage
+
+### Integration Testing
+- Test component interactions
+- Test API endpoints and database operations
+- Use test databases and mock services
+- Test error scenarios and edge cases
+
+### End-to-End Testing
+- Test complete user workflows
+- Use browser automation tools for frontend
+- Test API contracts and data flow
+- Test deployment and infrastructure
+
+## Documentation Requirements
+- Create comprehensive README with setup instructions
+- Document API endpoints with examples
+- Add inline code comments for complex logic
+- Create architecture diagrams and flowcharts
+- Document deployment procedures
+- Add troubleshooting guides
+
+## Next Steps and Deliverables
+1. **Immediate Actions:**
+   - Set up development environment
+   - Initialize project structure
+   - Configure version control
+   - Install dependencies
+
+2. **Core Implementation:**
+   - Implement main features based on requirements
+   - Set up database schema and models
+   - Create API endpoints and business logic
+   - Implement user interface components
+
+3. **Quality Assurance:**
+   - Write comprehensive tests
+   - Implement security measures
+   - Optimize performance
+   - Add monitoring and logging
+
+4. **Deployment:**
+   - Set up CI/CD pipeline
+   - Configure deployment environment
+   - Implement monitoring and alerting
+   - Create backup and recovery procedures
+
+---
+*Generated for local code generation - Ready to use with any AI assistant*
+*Generated on: ${new Date().toISOString()}*`
+
+      setGeneratedPrompt(prompt)
+      setIsGenerating(false)
+
+      // Auto-validate the generated prompt
+      setTimeout(() => {
+        const mockValidation = {
+          isValid: true,
+          score: 85,
+          issues: {
+            critical: [],
+            warning: ["Consider adding more specific requirements", "Technology stack could be more comprehensive"],
+            suggestion: ["Add code examples for complex concepts", "Include testing framework recommendations"]
+          },
+          metrics: {
+            completeness: 85,
+            clarity: 80,
+            specificity: 75,
+            structure: 90
+          },
+          recommendations: [
+            "Add more detailed functional requirements",
+            "Include specific performance benchmarks",
+            "Consider adding security compliance requirements",
+            "Include deployment environment specifics"
+          ]
+        }
+        setValidationResult(mockValidation)
+      }, 500)
+    }, 1500)
+  }
+
+  const exportPrompt = (format: 'json' | 'markdown' | 'txt') => {
+    if (!generatedPrompt) return
+
+    let content = ''
+    let filename = ''
+    let mimeType = ''
+
+    switch (format) {
+      case 'json':
+        const exportData = {
+          projectContext,
+          selectedTech,
+          requirements,
+          generatedPrompt,
+          validationResult,
+          exportedAt: new Date().toISOString()
+        }
+        content = JSON.stringify(exportData, null, 2)
+        filename = `${projectContext.name || 'prompt'}_export.json`
+        mimeType = 'application/json'
+        break
+      case 'markdown':
+        content = `# ${projectContext.name || 'Generated Prompt'}\n\n` +
+                  `**Generated:** ${new Date().toLocaleDateString()}\n\n` +
+                  `## Project Context\n\n` +
+                  `- **Type:** ${projectContext.type}\n` +
+                  `- **Scale:** ${projectContext.scale}\n` +
+                  `- **Architecture:** ${projectContext.architecture}\n\n` +
+                  `## Technology Stack\n\n` +
+                  Object.entries(selectedTech).map(([category, tech]) => 
+                    `- **${category}:** ${tech.name} v${tech.version}`
+                  ).join('\n') + '\n\n' +
+                  `## Generated Prompt\n\n` +
+                  generatedPrompt
+        filename = `${projectContext.name || 'prompt'}_export.md`
+        mimeType = 'text/markdown'
+        break
+      case 'txt':
+        content = `${projectContext.name || 'Generated Prompt'}\n` +
+                  `Generated: ${new Date().toLocaleDateString()}\n\n` +
+                  `Project Context:\n` +
+                  `Type: ${projectContext.type}\n` +
+                  `Scale: ${projectContext.scale}\n` +
+                  `Architecture: ${projectContext.architecture}\n\n` +
+                  `Technology Stack:\n` +
+                  Object.entries(selectedTech).map(([category, tech]) => 
+                    `${category}: ${tech.name} v${tech.version}`
+                  ).join('\n') + '\n\n' +
+                  `Generated Prompt:\n\n` +
+                  generatedPrompt
+        filename = `${projectContext.name || 'prompt'}_export.txt`
+        mimeType = 'text/plain'
+        break
+    }
+
+    // Create and download file
+    const blob = new Blob([content], { type: mimeType })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(generatedPrompt)
+  }
+
+  return (
+    <div className="min-h-screen bg-background p-4">
+      <div className="max-w-6xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight flex items-center justify-center gap-2">
+            <Code className="w-8 h-8" />
+            AI Code Generation Interface
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            Create accurate prompts for AI coding assistants - No API keys required
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left Column - Inputs */}
+          <div className="space-y-6">
+            {/* Project Context */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Wand2 className="w-5 h-5" />
+                  Project Context
+                </CardTitle>
+                <CardDescription>
+                  Define your project's basic information
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="project-name">Project Name</Label>
+                    <Input
+                      id="project-name"
+                      placeholder="My Awesome App"
+                      value={projectContext.name}
+                      onChange={(e) => setProjectContext(prev => ({ ...prev, name: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="project-type">Project Type</Label>
+                    <Select 
+                      value={projectContext.type} 
+                      onValueChange={(value) => setProjectContext(prev => ({ ...prev, type: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="web-app">Web App</SelectItem>
+                        <SelectItem value="api">API Service</SelectItem>
+                        <SelectItem value="desktop">Desktop App</SelectItem>
+                        <SelectItem value="mobile">Mobile App</SelectItem>
+                        <SelectItem value="cli">CLI Tool</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="project-description">Description</Label>
+                  <Textarea
+                    id="project-description"
+                    placeholder="Brief description of your project"
+                    value={projectContext.description}
+                    onChange={(e) => setProjectContext(prev => ({ ...prev, description: e.target.value }))}
+                    rows={2}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label>Scale</Label>
+                    <Select 
+                      value={projectContext.scale} 
+                      onValueChange={(value) => setProjectContext(prev => ({ ...prev, scale: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Scale" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="small">Small</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="enterprise">Enterprise</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Architecture</Label>
+                    <Select 
+                      value={projectContext.architecture} 
+                      onValueChange={(value) => setProjectContext(prev => ({ ...prev, architecture: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Architecture" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="mvc">MVC</SelectItem>
+                        <SelectItem value="microservices">Microservices</SelectItem>
+                        <SelectItem value="monolithic">Monolithic</SelectItem>
+                        <SelectItem value="serverless">Serverless</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Deployment</Label>
+                    <Select 
+                      value={projectContext.deployment} 
+                      onValueChange={(value) => setProjectContext(prev => ({ ...prev, deployment: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Deployment" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="cloud">Cloud</SelectItem>
+                        <SelectItem value="on-premise">On-Premise</SelectItem>
+                        <SelectItem value="hybrid">Hybrid</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Technology Selection */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Technology Stack</CardTitle>
+                <CardDescription>
+                  Select your technologies (optional but recommended)
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-[300px]">
+                  <div className="space-y-4">
+                    {Object.entries(technologies).map(([category, techs]) => (
+                      <div key={category} className="space-y-2">
+                        <h4 className="font-medium text-sm">{category}</h4>
+                        <div className="grid grid-cols-1 gap-2">
+                          {techs.map((tech) => (
+                            <div 
+                              key={tech.name}
+                              className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-colors ${
+                                selectedTech[category]?.name === tech.name 
+                                  ? 'border-primary bg-primary/5' 
+                                  : 'border-border hover:border-primary/50'
+                              }`}
+                              onClick={() => handleTechSelect(category, tech.name, tech.versions[0])}
+                            >
+                              <div className="flex items-center gap-2">
+                                <Checkbox 
+                                  checked={selectedTech[category]?.name === tech.name}
+                                  onChange={() => handleTechSelect(category, tech.name, tech.versions[0])}
+                                />
+                                <span className="font-medium">{tech.name}</span>
+                              </div>
+                              <Select 
+                                value={selectedTech[category]?.name === tech.name ? selectedTech[category].version : ""}
+                                onValueChange={(version) => handleTechSelect(category, tech.name, version)}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <SelectTrigger className="w-20 h-8">
+                                  <SelectValue placeholder="v" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {tech.versions.map((version) => (
+                                    <SelectItem key={version} value={version}>
+                                      v{version}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+
+            {/* Requirements */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Requirements</CardTitle>
+                <CardDescription>
+                  Describe what your project should do
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="functional-req">Features & Functionality</Label>
+                  <Textarea
+                    id="functional-req"
+                    placeholder="User authentication, data management, API endpoints, etc."
+                    value={requirements.functional}
+                    onChange={(e) => setRequirements(prev => ({ ...prev, functional: e.target.value }))}
+                    rows={3}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="non-functional-req">Performance & Security</Label>
+                  <Textarea
+                    id="non-functional-req"
+                    placeholder="Response time, scalability, security requirements, etc."
+                    value={requirements.nonFunctional}
+                    onChange={(e) => setRequirements(prev => ({ ...prev, nonFunctional: e.target.value }))}
+                    rows={2}
+                  />
+                </div>
+
+                {showAdvanced && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="business-logic">Business Logic</Label>
+                      <Textarea
+                        id="business-logic"
+                        placeholder="Core business rules and workflows"
+                        value={requirements.businessLogic}
+                        onChange={(e) => setRequirements(prev => ({ ...prev, businessLogic: e.target.value }))}
+                        rows={2}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="integrations">Integrations</Label>
+                      <Textarea
+                        id="integrations"
+                        placeholder="External APIs, databases, third-party services"
+                        value={requirements.integrations}
+                        onChange={(e) => setRequirements(prev => ({ ...prev, integrations: e.target.value }))}
+                        rows={2}
+                      />
+                    </div>
+                  </>
+                )}
+
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setShowAdvanced(!showAdvanced)}
+                  className="w-full"
+                >
+                  {showAdvanced ? "Hide Advanced" : "Show Advanced Options"}
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Generate Button */}
+            <Button 
+              onClick={generatePrompt} 
+              disabled={isGenerating || !projectContext.name}
+              className="w-full"
+              size="lg"
+            >
+              {isGenerating ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Generate AI Prompt
+                </>
+              )}
+            </Button>
+          </div>
+
+          {/* Right Column - Output */}
+          <div className="space-y-6">
+            {generatedPrompt ? (
+              <>
+                {/* Generated Prompt */}
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle>Generated Prompt</CardTitle>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={copyToClipboard}
+                        >
+                          <Copy className="w-4 h-4" />
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <Download className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent>
+                            <DropdownMenuItem onClick={() => exportPrompt('json')}>
+                              Export as JSON
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => exportPrompt('markdown')}>
+                              Export as Markdown
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => exportPrompt('txt')}>
+                              Export as Text
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+                    <CardDescription>
+                      Copy this prompt and use it with any AI assistant
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-[400px] w-full border rounded-md p-4">
+                      <pre className="whitespace-pre-wrap text-sm leading-relaxed">{generatedPrompt}</pre>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+
+                {/* Quality Validation */}
+                {validationResult && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <CheckCircle className="w-5 h-5" />
+                        Quality Assessment
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium">Overall Score</span>
+                        <div className="flex items-center gap-2">
+                          {validationResult.score >= 80 ? (
+                            <CheckCircle className="w-4 h-4 text-green-600" />
+                          ) : (
+                            <AlertTriangle className="w-4 h-4 text-yellow-600" />
+                          )}
+                          <Badge variant={validationResult.score >= 80 ? "default" : "secondary"}>
+                            {validationResult.score}/100
+                          </Badge>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span>Completeness</span>
+                            <span>{validationResult.metrics.completeness}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div 
+                              className="bg-blue-600 h-2 rounded-full" 
+                              style={{ width: `${validationResult.metrics.completeness}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span>Clarity</span>
+                            <span>{validationResult.metrics.clarity}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div 
+                              className="bg-green-600 h-2 rounded-full" 
+                              style={{ width: `${validationResult.metrics.clarity}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-medium">Recommendations</h4>
+                        <ul className="text-sm space-y-1">
+                          {validationResult.recommendations.slice(0, 3).map((rec: string, index: number) => (
+                            <li key={index} className="flex items-start gap-2">
+                              <Info className="w-3 h-3 mt-0.5 text-blue-500 flex-shrink-0" />
+                              <span>{rec}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </>
+            ) : (
+              <Card className="h-full flex items-center justify-center">
+                <CardContent className="text-center space-y-4">
+                  <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
+                    <Sparkles className="w-8 h-8 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium">Ready to Generate</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Fill in your project details and click "Generate AI Prompt" to create a comprehensive prompt for any AI assistant
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
